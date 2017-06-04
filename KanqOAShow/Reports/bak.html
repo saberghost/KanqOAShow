@@ -1,0 +1,373 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>已供地报批项目</title>
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        #search {
+            text-align: left;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .formTable {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+            .formTable td {
+                border: solid 1px #95B8E7;
+                word-wrap: break-word;
+                font-size: 14px;
+            }
+
+        .td_name {
+            text-align: right;
+            width: 250px;
+        }
+
+        /*#queryDiv {
+            width: 1000px;
+        }*/
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/datagrid-cellediting.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script>
+        var urlAuthority = "http://localhost:38236/";
+        $(function () {
+            $("#queryDiv").css("display", "none");
+            $("#gyjgDiv").css("display", "none");
+            loadDataGrid();
+            $("#btnSearch").click(function () {
+                reloadDataGrid();
+            });
+            $("#btnGraphicsLocation").click(function () {
+                var row = $("#showListTable").datagrid("getSelected");
+                if (row == null) {
+                    $.messager.alert("提示", "请先选择一行记录", "error");
+                    return;
+                }
+                window.parent.webform.MyEvents(0, "popupform['土地报批数据台账_图形定位']()()( " + row.JSXMBH + ")");
+            });
+        });
+
+        function reloadDataGrid() {
+            $("#showListTable").datagrid("load", serializeObject($("#showListForm")));
+        }
+
+        //打开报批项目查询表单
+        function openQuery(rowData) {
+            $("#queryDiv").css("display", "");
+            showNzzxm(rowData);
+            showCsydqk(rowData);
+            loadGyqkData(rowData)
+            $("#queryDiv").dialog({
+                width: 1000,
+                title: "报批项目查询",
+                collapsible: true,
+                maximizable: true,
+                maximized: true,
+                resizable: true,
+                modal: true,
+                shadow: false,
+                onClose: function () {
+                }
+            });
+        }
+
+        //打开供应结果表单
+        function openGyjg(rowData) {
+            $("#gyjgDiv").css("display", "");
+            $("#GDMJ").html(rowData.GDMJ);
+            loadBpxmData(rowData);
+            $("#gyjgDiv").dialog({
+                width: 1000,
+                title: "供应结果",
+                collapsible: true,
+                maximizable: true,
+                maximized: true,
+                resizable: true,
+                modal: true,
+                shadow: false,
+                onClose: function () {
+                }
+            });
+        }
+
+        //显示农转征项目
+        function showNzzxm(rowData) {
+            $("#XMMC").html(rowData.XMMC);
+            $("#PZDW").html(rowData.PZDW);
+            $("#XMLX").html(rowData.XMLX);
+            $("#PZWH").html(rowData.PZWH);
+            $("#PZRQ").html(rowData.PZRQ);
+            $("#ZMJ").html(rowData.ZMJ);
+        }
+
+        //显示城市用地情况
+        function showCsydqk(rowData) {
+            if (rowData.XMLX != "3") {
+                $("#queryDiv .formTable").eq(1).css("display", "none").next().css("display", "none");
+            } else {
+                $("#queryDiv .formTable").eq(1).css("display", "").next().css("display", "");
+                $("#GWYPFWH").html(rowData.GWYPFWH);
+                $("#GWYPFRQ").html(rowData.GWYPFRQ);
+                $("#GWYPFBSMJ").html(rowData.GWYPFBSMJ);
+            }
+        }
+
+        function linkQuery(index) {
+            var rowData = $("#showListTable").datagrid("getData").rows[index];
+            openQuery(rowData);
+        }
+
+        //加载数据列表
+        function loadDataGrid() {
+            $("#showListTable").datagrid({
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                width: "100%",
+                height: 533,
+                url: urlAuthority + "YGDBPXM/ShowList?callback=?",
+                columns:
+                [[
+                    { field: 'SLID', title: '受理号', align: "center", hidden: true },
+                    { field: 'SSXZ', title: '行政区划', align: "center", width: "16%", resizable: true },
+                    {
+                        field: 'XMMC', title: '项目名称', align: "center", width: "16%", formatter: function (value, row, index) {
+                            if (value == null) {
+                                return value;
+                            }
+                            return '<a style="color:black" href="javascript:void(0)" onclick="linkQuery(' + index + ')">' + value + '</a>';
+                        }
+                    },
+                    { field: 'ZMJ', title: '项目总面积', align: "center", width: "16%" },
+                    {
+                        field: 'XMLX', title: '项目类型', align: "center", width: "16%", formatter: function (value, row, index) {
+                            var dicValue = "";
+                            switch (value) {
+                                case "1":
+                                    dicValue = "城市分批次";
+                                    break;
+                                case "2":
+                                    dicValue = "单独选址";
+                                    break;
+                                case "3":
+                                    dicValue = "城市用地";
+                                    break;
+                                default:
+                                    dicValue = value;
+                            }
+                            return dicValue;
+                        }
+                    },
+                    { field: 'PZWH', title: '批复文号', align: "center", width: "16%" },
+                    { field: 'PZRQ', title: '批准时间', align: "center", width: "20%" },
+                    { field: 'PZDW', title: '批准单位', align: "center", hidden: true },
+                    { field: 'GWYPFWH', title: '国务院批复文号', align: "center", hidden: true },
+                    { field: 'GWYPFRQ', title: '国务院批复时间', align: "center", hidden: true },
+                    { field: 'GWYPFBSMJ', title: '国务院批复本市面积', align: "center", hidden: true },
+                    { field: 'JSXMBH', title: '建设项目编号', align: "center", hidden: true }
+                ]],
+                //onClickCell: function (rowIndex, field, value) {
+                //    if (field != "XMMC") {
+                //        return;
+                //    }
+                //    var rowData = $(this).datagrid("getData").rows[rowIndex];
+                //    openQuery(rowData);
+                //},
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+
+        //加载供应情况列表
+        function loadGyqkData(data) {
+            $("#gyqkTable").datagrid({
+                title: "供应情况",
+                width: "100%",
+                url: urlAuthority + "YGDBPXM/ShowGyqkList?callback=?",
+                queryParams: { BPSLH: data.SLID },
+                columns:
+                [[
+                    { field: 'GY_BPID', title: '供应报批ID', align: "center", hidden: true },
+                    { field: 'QBSPDID', title: '签报审批单ID', align: "center", hidden: true },
+                    { field: 'TDGYFS', title: '供应类型', align: "center", width: "20%" },
+                    { field: 'ZDBH', title: '宗地编号', align: "center", width: "20%" },
+                    { field: 'XMMC', title: '项目名称', align: "center", width: "20%" },
+                    {
+                        field: 'PZWH', title: '批复(准)文号', align: "center", width: "20%", formatter: function (value, row, index) {
+                            return '<a style="color:blue" href="javascript:void(0)">' + value + '</a>';
+                        }
+                    },
+                    { field: 'GDMJ', title: '供地面积(公顷)', align: "center", width: "20%" }
+                ]],
+                onClickCell: function (rowIndex, field, value) {
+                    if (field != "PZWH") {
+                        return;
+                    }
+                    var rowData = $(this).datagrid("getData").rows[rowIndex];
+                    openGyjg(rowData);
+                    $("#queryDiv").dialog("close");
+                },
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+
+        //加载报批项目列表
+        function loadBpxmData(data) {
+            $("#bpxmTable").datagrid({
+                //title: "供应情况",
+                width: "100%",
+                url: urlAuthority + "YGDBPXM/ShowBpxmData?callback=?",
+                queryParams: { GY_BPID: data.GY_BPID },
+                columns:
+                [[
+                    { field: 'BPSLH', title: '报批受理号', align: "center", hidden: true },
+                    {
+                        field: 'PCMC', title: '项目名称', align: "center", width: "50%", formatter: function (value, row, index) {
+                            if (row.BPSLH == null) {
+                                return value;
+                            } else {
+                                return '<a style="color:blue" href="javascript:void(0)">' + value + '</a>';
+                            }
+                        }
+                    },
+                    { field: 'GDMJ', title: '出让面积(公顷)', align: "center", width: "50%" }
+                ]],
+                onClickCell: function (rowIndex, field, value) {
+                    if (field != "PCMC") {
+                        return;
+                    }
+                    var rowData = $(this).datagrid("getData").rows[rowIndex];
+                    if (rowData.BPSLH == null) {
+                        return;
+                    }
+                    $.getJSON(urlAuthority + "YGDBPXM/GetQueryData?callback=?", { BPSLH: rowData.BPSLH }, function (json) {
+                        if (json == null) {
+                            $.messager.alert("提示", "未查询到数据", "error");
+                        } else {
+                            openQuery(json);
+                            $("#gyjgDiv").dialog("close");
+                        }
+                    });
+                },
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+
+        function serializeObject(form) {
+            var o = {};
+            $.each(form.serializeArray(), function (index) {
+                if (o[this["name"]]) {
+                    o[this["name"]] = o[this["name"]] + "," + this["value"];
+                } else {
+                    o[this["name"]] = this["value"];
+                }
+            })
+            return o;
+        }
+    </script>
+</head>
+<body>
+    <div id="master">
+        <h1>已供地报批项目</h1>
+        <div id="search">
+            <form id="showListForm">
+                行政区划：<input name="SSXZ" type="text" />
+                项目名称：<input name="XMMC" type="text" />
+                批复文号：<input name="PZWH" type="text" />
+                <input id="btnSearch" type="button" value="查询" />
+                <input id="btnGraphicsLocation" type="button" value="图形定位" />
+            </form>
+        </div>
+        <br />
+        <div id="showListDiv">
+            <table id="showListTable"></table>
+        </div>
+    </div>
+
+    <!--报批项目查询-->
+    <div id="queryDiv">
+        <div style="width:95%;margin:15px auto">
+            <table class="formTable">
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">农转征项目</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">项目名称：</td>
+                    <td id="XMMC" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批准单位：</td>
+                    <td id="PZDW"></td>
+                    <td class="td_name">项目类型：</td>
+                    <td id="XMLX"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批复文号：</td>
+                    <td id="PZWH"></td>
+                    <td class="td_name">批准日期：</td>
+                    <td id="PZRQ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">总面积(公顷)：</td>
+                    <td id="ZMJ"></td>
+                    <td class="td_name"></td>
+                    <td></td>
+                </tr>
+            </table>
+            <br />
+
+            <table class="formTable">
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">城市用地情况</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">国务院批复文号：</td>
+                    <td id="GWYPFWH"></td>
+                    <td class="td_name">国务院批复时间：</td>
+                    <td id="GWYPFRQ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">国务院批复本市面积(公顷)：</td>
+                    <td id="GWYPFBSMJ"></td>
+                    <td class="td_name"></td>
+                    <td></td>
+                </tr>
+            </table>
+            <br />
+
+            <table id="gyqkTable"></table>
+        </div>
+    </div>
+
+    <!--供应结果-->
+    <div id="gyjgDiv">
+        <div style="width:95%;margin:15px auto">
+            <table id="bpxmTable"></table>
+            <table class="formTable">
+                <tr>
+                    <td>总面积</td>
+                    <td id="GDMJ"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

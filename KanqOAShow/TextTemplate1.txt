@@ -1,0 +1,22 @@
+﻿{ field: "ID", title: "主键", align: "center", width:50},
+{ field: "XMMC", title: "项目名称", align: "center", width:50},
+{ field: "PC", title: "批次", align: "center", width:50},
+{ field: "HS", title: "户数", align: "center", width:50},
+{ field: "NYRK", title: "农业人口", align: "center", width:50},
+{ field: "ZXCZ1", title: "中心出资1", align: "center", width:50},
+{ field: "ZXCZ2", title: "中心出资2", align: "center", width:50},
+{ field: "HJJE", title: "合计金额", align: "center", width:50},
+{ field: "QKSJ", title: "请款时间", align: "center", width:50},
+{ field: "BZ", title: "备注", align: "center", width:50},
+
+entity.ID = CurrentDal.LoadEntities(t => true).Sum(t => t.ID);
+entity.XMMC = CurrentDal.LoadEntities(t => true).Sum(t => t.XMMC);
+entity.PC = CurrentDal.LoadEntities(t => true).Sum(t => t.PC);
+entity.HS = CurrentDal.LoadEntities(t => true).Sum(t => t.HS);
+entity.NYRK = CurrentDal.LoadEntities(t => true).Sum(t => t.NYRK);
+entity.ZXCZ1 = CurrentDal.LoadEntities(t => true).Sum(t => t.ZXCZ1);
+entity.ZXCZ2 = CurrentDal.LoadEntities(t => true).Sum(t => t.ZXCZ2);
+entity.HJJE = CurrentDal.LoadEntities(t => true).Sum(t => t.HJJE);
+entity.QKSJ = CurrentDal.LoadEntities(t => true).Sum(t => t.QKSJ);
+entity.BZ = CurrentDal.LoadEntities(t => true).Sum(t => t.BZ);
+'11CC9F0B624D4A419BF8','12B1597CDB6A43EFBFEB','465418FE58CD4230BFD7','8240F885DA774A3B93F1','BP201607200005','BP201608090069','BP201608120009','BP201608260044','BP201608260045','BP201608280001','BP201608280005','BP201608280006','BP201608280007','BP201608290043','BP201609050010',

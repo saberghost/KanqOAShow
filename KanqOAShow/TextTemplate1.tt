@@ -1,0 +1,52 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".txt" #>
+<#    string str=@"ID	主键
+XMMC	项目名称
+PC	批次
+HS	户数
+NYRK	农业人口
+ZXCZ1	中心出资1
+ZXCZ2	中心出资2
+HJJE	合计金额
+QKSJ	请款时间
+BZ	备注
+"; 
+    string[] strs=str.Split(new string[]{"\r\n"},StringSplitOptions.RemoveEmptyEntries);
+    Dictionary<string,string> dic=new Dictionary<string,string>();
+    foreach(string item in strs){
+        string[] temps= item.Split(new string[]{"\t"},StringSplitOptions.RemoveEmptyEntries);
+        dic.Add(temps[0].Trim(),temps[1].Trim());
+    }
+    foreach(KeyValuePair<string,string> kv in dic){ #>
+<#=            "{ field: \""+kv.Key+"\", title: \""+kv.Value+"\", align: \"center\", width:50}," #>
+<#    }#>
+
+<# foreach(KeyValuePair<string,string> kv in dic){ #>
+<#="entity."+kv.Key+" = CurrentDal.LoadEntities(t => true).Sum(t => t."+kv.Key+");"#>
+<#    }#>
+<#    string str1=@"11CC9F0B624D4A419BF8
+        12B1597CDB6A43EFBFEB
+        465418FE58CD4230BFD7
+        8240F885DA774A3B93F1
+        BP201607200005
+        BP201608090069
+        BP201608120009
+        BP201608260044
+        BP201608260045
+        BP201608280001
+        BP201608280005
+        BP201608280006
+        BP201608280007
+        BP201608290043
+        BP201609050010";
+    string[] str1s= str1.Split(new string[]{"\r\n"},StringSplitOptions.RemoveEmptyEntries);
+    string sumStr="";
+    foreach(string item in str1s){
+        sumStr+="'"+item.Trim()+"',";
+    }
+#>
+<#=sumStr #>

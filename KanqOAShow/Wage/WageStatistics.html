@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>长沙县国土资源局劳务派遣人员调整工资明细表</title>
+    <meta charset="utf-8" />
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 1068px;
+        }
+
+        #search {
+            text-align: left;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form td {
+            border: solid 1px black;
+            width: 150px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        form input {
+            margin-top: -1px;
+            margin-bottom: -1px;
+            height: 20px;
+            border: none;
+            /*width: 99%;*/
+            font-size: 14px;
+        }
+
+        form textarea {
+            margin-top: -1px;
+            margin-bottom: -1px;
+            border: none;
+            width: 99%;
+            height: 50px;
+        }
+
+        span.datebox {
+            border: 0;
+        }
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/datagrid-cellediting.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../Scripts/share.js"></script>
+    <script>
+        var bmData = [
+            { lable: "长沙县不动产登记中心", value: "不动产登记中心" },
+            { lable: "长沙县土地开发中心", value: "开发中心" },
+            { lable: "长沙县征地拆迁中心", value: "拆迁中心" },
+            { lable: "长沙县国土资源测绘队", value: "测绘队" },
+            { lable: "长沙县土地整理中心", value: "整理中心" },
+            { lable: "长沙县国土资源交易中心", value: "交易中心" }
+        ];
+        $(function () {
+            loadDataGrid();
+            $("#txtTjrq").combobox({
+                valueField: "VALUE",
+                textField: "TJRQ",
+                width: 100,
+                mode: "remote",
+                method: "get",
+                url: urlAuthority + "WageStatistics/GetSingleTjrq?callback=?",
+                onSelect: function (record) {
+                    reloadData();
+                }
+            });
+            $("#txtBM").combobox({
+                valueField: "value",
+                textField: "lable",
+                width: 160,
+                data: bmData,
+                onSelect: function () {
+                    reloadData();
+                }
+            });
+        });
+
+        function formatCellTooltip(value) {
+            return "<span title='" + value + "'>" + value + "</span>";
+        }
+
+        function reloadData() {
+            $("#t1").datagrid("load", {
+                txtBM: $("#txtBM").combobox("getValue"),
+                txtTjrq: $("#txtTjrq").combobox("getValue"),
+                action: "statistics"
+            });
+        }
+
+        function bindExportClick() {
+            var txtTjrq = $("#txtTjrq").combobox("getValue");
+            var txtBM = $("#txtBM").combobox("getValue");
+            var lableBM = $("#txtBM").combobox("getText");
+            open(urlAuthority + "WageStatistics/ExportExcel?txtTjrq=" + txtTjrq + "&txtBM=" + txtBM + "&lableBM=" + lableBM);
+        }
+
+        function loadDataGrid() {
+            /// <summary>加载数据列表</summary>
+            $("#t1").datagrid({
+                toolbar: [{
+                    id: 'btnExport',
+                    text: '导出Excel',
+                    iconCls: 'icon-redo',
+                    handler: 'bindExportClick'
+                }],
+                rownumbers: true,//显示行数
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                height: 574,
+                url: urlAuthority + "WageStatistics/statistics?callback=?",
+                columns:
+                [
+                    [
+                        //{ field: 'ck', rowspan: 2, checkbox: true },
+                        { field: 'ID', title: 'ID', rowspan: 2, align: "center", width: 50, hidden: true },
+                        { field: 'YEARLESS', title: 'YEARLESS', rowspan: 2, align: "center", width: 50, hidden: true },
+                        { field: 'XM', title: '姓名', rowspan: 2, align: "center", width: 50 },
+                        { field: 'XB', title: '性别', rowspan: 2, align: "center", width: 50 },
+                        { field: 'WHCD', title: '文化<br />程度', rowspan: 2, align: "center", width: 50 },
+                        { field: 'JRBDWSJ', title: '进入本单位<br />工作时间', rowspan: 2, align: "center", width: 80 },
+                        { field: 'SFZHM', title: '身份证号', rowspan: 2, align: "center", width: 125 },
+                        { field: 'GZGW', title: '工作岗位', rowspan: 2, align: "center", width: 80 },
+                        { title: '现工资情况', colspan: 4, align: "center" },
+                        { title: '本月增加', colspan: 2, align: "center" },
+                        { field: 'HJ', title: '合计<br />（元/月）', rowspan: 2, align: "center", width: 80 },
+                        { field: 'ZXSJ', title: '执行时间', rowspan: 2, align: "center", width: 80 },
+                        { field: 'BZ', title: '备注', rowspan: 2, align: "center", width: 100, formatter: formatCellTooltip }
+                    ],
+                    [
+                        { field: 'JBGZ', title: '基本<br />工资', align: "center", width: 50 },
+                        { field: 'GWGZ', title: '岗位<br />工资', align: "center", width: 50 },
+                        { field: 'HSBZ', title: '伙食<br />补助', align: "center", width: 50 },
+                        { field: 'JTBZ', title: '交通<br />补助', align: "center", width: 50 },
+                        {
+                            field: 'BYXZJBGZ', title: '基本工资', align: "center", width: 70, editor: 'text', styler: function (value, row, index) {
+                                return 'color:red;';
+                            }
+                        },
+                        {
+                            field: 'BYXZGWGZ', title: '岗位工资', align: "center", width: 70, editor: 'text', styler: function (value, row, index) {
+                                return 'color:red;';
+                            }
+                        }
+                    ]
+                ],
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="master">
+        <h1>长沙县国土资源局劳务派遣人员调整工资明细表</h1>
+        <div id="search">
+            <label>查询月份：</label>
+            <input id="txtTjrq" />
+        </div>
+        <br />
+        <div>
+            <span style="font-family:楷体_GB2312">单位：</span>
+            <input id="txtBM" />
+            <span style="font-family:楷体_GB2312;float:right">单位：元/月</span>
+        </div>
+        <div id="dataGrid">
+            <table id="t1"></table>
+        </div>
+        <form id="sendForm" method="post"></form>
+    </div>
+</body>
+</html>

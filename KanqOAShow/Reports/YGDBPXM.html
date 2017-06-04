@@ -1,0 +1,392 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>已供地报批项目</title>
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        #search {
+            text-align: left;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .formTable {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+            .formTable td {
+                border: solid 1px #95B8E7;
+                word-wrap: break-word;
+                font-size: 14px;
+            }
+
+        .td_name {
+            text-align: right;
+        }
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/datagrid-cellediting.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../Scripts/BPGY.js"></script>
+    <script src="../Scripts/share.js"></script>
+    <script>
+        $(function () {
+            $("#queryDiv").css("display", "none");
+            $("#hbjdsDetailDiv").css("display", "none");
+            $("#crhtDetailDiv").css("display", "none");
+            $("#bppdZplDiv").css("display", "none");
+            loadDataGrid();
+        });
+
+        function reloadDataGrid() {
+            $("#showListTable").datagrid("load", serializeObject($("#showListForm")));
+        }
+
+        function resetDataGrid() {
+            $("#showListForm input").val("");
+            reloadDataGrid();
+        }
+
+        function linkQuery(index) {
+            var rowData = $("#showListTable").datagrid("getData").rows[index];
+            openQuery(rowData);
+        }
+
+        function linkGraphicsLocation(index) {
+            var row = $("#showListTable").datagrid("getData").rows[index];
+            window.parent.webform.MyEvents(0, "popupform['土地报批数据台账_图形定位']()()(" + row.PZWH + ")");
+        }
+
+        //加载数据列表
+        function loadDataGrid() {
+            $("#showListTable").datagrid({
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                width: "100%",
+                height: 533,
+                url: urlAuthority + "YGDBPXM/ShowList?callback=?",
+                columns:
+                [[
+                    { field: 'SLID', title: '受理号', align: "center", hidden: true },
+                    { field: 'SSXZ', title: '行政区划', align: "center", width: "12%", resizable: true },
+                    {
+                        field: 'XMMC', title: '项目名称', align: "center", width: "32%", formatter: function (value, row, index) {
+                            if (value == null) {
+                                return value;
+                            }
+                            return '<a title="'+value+'" style="color:black" href="javascript:void(0)" onclick="linkQuery(' + index + ')">' + value + '</a>';
+                        }
+                    },
+                    { field: 'ZMJ', title: '项目总面积', align: "center", width: "12%" },
+                    {
+                        field: 'XMLX', title: '项目类型', align: "center", width: "12%", formatter: function (value, row, index) {
+                            var dicValue = "";
+                            switch (value) {
+                                case "1":
+                                    dicValue = "城市分批次";
+                                    break;
+                                case "2":
+                                    dicValue = "单独选址";
+                                    break;
+                                case "3":
+                                    dicValue = "城市用地";
+                                    break;
+                                default:
+                                    dicValue = value;
+                            }
+                            return dicValue;
+                        }
+                    },
+                    { field: 'PZWH', title: '批复文号', align: "center", width: "16%" },
+                    { field: 'PZRQ', title: '批准时间', align: "center", width: "12%" },
+                    {
+                        field: 'button', title: '定位', align: "center", width: "4%" ,formatter: function (value, row, index) {
+                            return '<img style="cursor:pointer" src="Content/img/location.png" onclick="linkGraphicsLocation(' + index + ')"/>';
+                        }
+                    },
+                    { field: 'PZDW', title: '批准单位', align: "center", hidden: true },
+                    { field: 'GWYPFWH', title: '国务院批复文号', align: "center", hidden: true },
+                    { field: 'GWYPFRQ', title: '国务院批复时间', align: "center", hidden: true },
+                    { field: 'GWYPFBSMJ', title: '国务院批复本市面积', align: "center", hidden: true },
+                    { field: 'JSXMBH', title: '建设项目编号', align: "center", hidden: true }
+                ]],
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="master">
+        <!--<h1>已供地报批项目</h1>-->
+        <div id="search">
+            <form id="showListForm">
+                行政区划：<input name="SSXZ" type="text" />
+                项目名称：<input name="XMMC" type="text" />
+                批复文号：<input name="PZWH" type="text" />
+                <a id="btnSearch" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="reloadDataGrid()">查询</a>
+                <a id="btnReset" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="resetDataGrid()">重置</a>
+            </form>
+        </div>
+        <br />
+        <div id="showListDiv">
+            <table id="showListTable"></table>
+        </div>
+    </div>
+    
+    <!--报批项目查询-->
+    <div id="queryDiv">
+        <div style="width:95%;margin:15px auto">
+            <table class="formTable">
+                <colgroup>
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                </colgroup>
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">农转征项目</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">项目名称：</td>
+                    <td id="XMMC" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批准单位：</td>
+                    <td id="PZDW"></td>
+                    <td class="td_name">项目类型：</td>
+                    <td id="XMLX"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批复文号：</td>
+                    <td id="PZWH"></td>
+                    <td class="td_name">批准日期：</td>
+                    <td id="PZRQ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">总面积(公顷)：</td>
+                    <td id="ZMJ"></td>
+                    <td class="td_name"></td>
+                    <td></td>
+                </tr>
+            </table>
+            <br />
+
+            <table class="formTable">
+                <colgroup>
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                </colgroup>
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">城市用地情况</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">国务院批复文号：</td>
+                    <td id="GWYPFWH"></td>
+                    <td class="td_name">国务院批复时间：</td>
+                    <td id="GWYPFRQ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">国务院批复本市面积(公顷)：</td>
+                    <td id="GWYPFBSMJ"></td>
+                    <td class="td_name"></td>
+                    <td></td>
+                </tr>
+            </table>
+            <br />
+
+            <table id="gyqkTable"></table>
+        </div>
+    </div>
+
+    <!--划拨决定书详细信息-->
+    <div id="hbjdsDetailDiv">
+        <div style="width:95%;margin:15px auto">
+            <table id="hbjdsDetailTable" class="formTable">
+                <colgroup>
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                </colgroup>
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">划拨决定书查看</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">建设项目名称：</td>
+                    <td id="JSXMMC" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">电子监管号：</td>
+                    <td id="DZJGH"></td>
+                    <td class="td_name">划拨决定书编号：</td>
+                    <td id="HBJDSBH"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批准机关：</td>
+                    <td id="PZJG"></td>
+                    <td class="td_name">批准文号：</td>
+                    <td id="PZWH"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">宗地用途：</td>
+                    <td id="ZDYT"></td>
+                    <td class="td_name">宗地编号：</td>
+                    <td id="ZDBH"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">宗地坐落：</td>
+                    <td id="ZDZL"></td>
+                    <td class="td_name">宗地总面积：</td>
+                    <td id="ZDZMJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">划拨面积：</td>
+                    <td id="HBZDMJ"></td>
+                    <td class="td_name">划拨价款：</td>
+                    <td id="HBJK"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">开工时间：</td>
+                    <td id="KGSJ"></td>
+                    <td class="td_name">竣工时间：</td>
+                    <td id="JGSJ"></td>
+                </tr>
+            </table>
+            <br />
+            <table id="bpxmTable1"></table>
+        </div>
+    </div>
+
+    <!--出让合同详细信息-->
+    <div id="crhtDetailDiv">
+        <div style="width:95%;margin:15px auto">
+            <table id="crhtDetailTable" class="formTable">
+                <colgroup>
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                    <col style="width:15%" />
+                    <col style="width:35%" />
+                </colgroup>
+                <tr>
+                    <th class="panel-header" colspan="4"><span class="panel-title">出让合同查看</span></th>
+                </tr>
+                <tr>
+                    <td class="td_name">项目名称：</td>
+                    <td id="XMMC"></td>
+                    <td class="td_name">宗地编号：</td>
+                    <td id="ZDBH"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">电监管号：</td>
+                    <td id="DJGH"></td>
+                    <td class="td_name">合同编号：</td>
+                    <td id="HTBH"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">受让单位：</td>
+                    <td id="SRDW"></td>
+                    <td class="td_name">出让面积：</td>
+                    <td id="CRMJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">土地位置：</td>
+                    <td id="TDWZ"></td>
+                    <td class="td_name">土地用途：</td>
+                    <td id="TDYT"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">出让时间：</td>
+                    <td id="CRSJ"></td>
+                    <td class="td_name">土地总面积：</td>
+                    <td id="TDZMJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">出让方式：</td>
+                    <td id="CRFS"></td>
+                    <td class="td_name">出让金：</td>
+                    <td id="CRJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">约定缴纳期限：</td>
+                    <td id="YDJNQX"></td>
+                    <td class="td_name">出让价款单价：</td>
+                    <td id="CRJKDJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">出让价款总价：</td>
+                    <td id="CRJKZJ"></td>
+                    <td class="td_name">已交价款：</td>
+                    <td id="YJJK"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">欠缴价款：</td>
+                    <td id="QJJK"></td>
+                    <td class="td_name">投资额：</td>
+                    <td id="TZE"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">出让年限：</td>
+                    <td id="CRNX"></td>
+                    <td class="td_name">容积率：</td>
+                    <td id="RJL"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">建筑密度：</td>
+                    <td id="JZMD"></td>
+                    <td class="td_name">绿地率：</td>
+                    <td id="LDL"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">批准文号：</td>
+                    <td id="PZWH"></td>
+                    <td class="td_name">土地级别：</td>
+                    <td id="TDJB"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">约定交地时间：</td>
+                    <td id="YDJDSJ"></td>
+                    <td class="td_name">约定开工时间：</td>
+                    <td id="YDKGSJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">约定竣工时间：</td>
+                    <td id="YDJGSJ"></td>
+                    <td class="td_name">合同签订时间：</td>
+                    <td id="HTQDSJ"></td>
+                </tr>
+                <tr>
+                    <td class="td_name">政府批准会议纪要或文号：</td>
+                    <td id="ZFPZHYJYHWH"></td>
+                    <td class="td_name">联系人：</td>
+                    <td id="LXR"></td>
+                </tr>
+            </table>
+            <br />
+            <table id="bpxmTable2"></table>
+        </div>
+    </div>
+
+    <!--报批批单子表详细信息-->
+    <div id="bppdZplDiv">
+        <div style="width:95%;margin:15px auto">
+            <table id="bppdZpTable"></table>
+        </div>
+    </div>
+</body>
+</html>

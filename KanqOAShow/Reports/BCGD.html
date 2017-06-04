@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>长沙县2016年度补充耕地项目指标使用台帐</title>
+    <meta charset="utf-8" />
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 1974px;
+            text-align: center;
+        }
+
+        #search {
+            text-align: left;
+        }
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/datagrid-cellediting.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../Scripts/share.js"></script>
+    <script>
+        $(function () {
+            $('#btnExportExcel').linkbutton({
+                onClick: function () {
+                    open(urlAuthority + "BCGDDJK/ExportExcel")
+                }
+            });
+            loadDataGrid();
+        });
+
+        function columnInitialize() {
+            var columns = [[
+                        { field: 'BCGDDJKID', title: '补充耕地登记卡ID', align: "center", width: 80, hidden: true },
+                        { field: 'OID', title: '序号', align: "center", width: 80, hidden: true },
+                        { field: 'BCGDDD', title: '补充耕地<br />项目名称', align: "center", width: 140 },
+                        { field: 'JSGM', title: '建设规模<br />（公顷)', align: "center", width: 80 },
+                        { field: 'JZGDMJ', title: '验收面积<br />（公顷）', align: "center", width: 80 },
+                        { field: 'QZST', title: '其中水田<br />（公顷）', align: "center", width: 80, editor: 'text' },
+                        { field: 'YSDW', title: '验收单位', align: "center", width: 100 },
+                        { field: 'YSSJ', title: '验收时间', align: "center", width: 80 },
+                        { field: 'YSWH', title: '验收文号', align: "center", width: 80 },
+                        { field: 'ZBQRDW', title: '指标确认单位', align: "center", width: 80, editor: 'text' },
+                        { field: 'QRSJ', title: '确认时间', align: "center", width: 80, editor: 'datebox' },
+                        { field: 'XMWZ', title: '项目位置', align: "center", width: 80, editor: 'text' },
+                        { field: 'TF', title: '图幅', align: "center", width: 80 },
+                        { field: 'TBH', title: '图斑号', align: "center", width: 80 },
+                        { field: 'ZXDWZ', title: '中心点位置', align: "center", width: 80, editor: 'text' },
+                        { field: 'YDL', title: '原地类', align: "center", width: 80, editor: 'text' },
+                        { field: 'SCBH', title: '报备编号', align: "center", width: 100 }
+            ]];
+            for (var i = 0; i < columns[0].length; i++) {
+                columns[0][i].formatter = formatCellTooltip;
+            }
+            return columns;
+        }
+
+        function columnDerivedInitialize() {
+            var columns = [[
+                    { field: 'BCGDDJKID', title: '补充耕地登记卡ID', align: "center", width: 80, hidden: true },
+                    { field: 'OID', title: '序号', align: "center", width: 80, hidden: true },
+                    { field: 'APJSXMJZYGDDW', title: '对应建设用地<br />项目名称', align: "center", width: 120 },
+                    { field: 'ZYD', title: '总用地<br />（公顷）', align: "center", width: 80, editor: 'text' },
+                    { field: 'ZYGDMJ', title: '占用耕地面积<br />（公顷）', align: "center", width: 80 },
+                    { field: 'BCGDMJ', title: '抵扣面积<br />（公顷）', align: "center", width: 80 },
+                    { field: 'SYGDMJ', title: '本次抵扣剩余<br />（公顷）', align: "center", width: 80 },
+                    { field: 'SYGDMJ', title: '剩余指标<br />（公顷）', align: "center", width: 80 },
+                    { field: 'BZ', title: '备注', align: "center", width: 150, editor: 'text' }
+            ]];
+            for (var i = 0; i < columns[0].length; i++) {
+                columns[0][i].formatter = formatCellTooltip;
+            }
+            return columns;
+        }
+
+        function loadDataGrid() {
+            /// <summary>加载数据列表</summary>
+            $("#t1").datagrid({
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                height: 520,
+                url: urlAuthority + "BCGDDJK/ShowList?callback=?",
+                columns: columnInitialize(),
+                onClickRow: function (rowIndex, rowData) {
+                    $("#t2").datagrid("load", {
+                        BCGDDJKID: rowData["BCGDDJKID"],
+                        SCBH: rowData["SCBH"],
+                    });
+                },
+                onClickCell: function (rowIndex, field, value) {
+                    $(this).datagrid("editCell", { index: rowIndex, field: field });
+                    var editor = $(this).datagrid('getEditor', { index: rowIndex, field: field });
+                    if (editor == null) {
+                        return false;
+                    }
+                    editor.target.focus();
+                    editor.target.focusout(function () {
+                        $("#t1").datagrid("acceptChanges");
+                    });
+                },
+                onAfterEdit: function (index, row, changes) {
+                    $.post(urlAuthority + "BCGDDJK/Update", row, function (data) {
+
+                    });
+                },
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+            $("#t2").datagrid({
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                height: 520,
+                url: urlAuthority + "BCGDDJK/ShowChildList?callback=?",
+                columns: columnDerivedInitialize(),
+                onClickCell: function (rowIndex, field, value) {
+                    $(this).datagrid("editCell", { index: rowIndex, field: field });
+                    var editor = $(this).datagrid('getEditor', { index: rowIndex, field: field });
+                    if (editor == null) {
+                        return false;
+                    }
+                    editor.target.focus();
+                    editor.target.focusout(function () {
+                        $("#t1").datagrid("acceptChanges");
+                    });
+                },
+                onAfterEdit: function (index, row, changes) {
+                    $.post(urlAuthority + "BCGDDJK/ChildUpdate", row, function (data) {
+
+                    });
+                },
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+
+        function formatCellTooltip(value) {
+            if (!value) {
+                return;
+            }
+            return "<span title='" + value + "'>" + value + "</span>";
+        }
+    </script>
+</head>
+<body>
+    <div id="master">
+        <h1>长沙县2016年度补充耕地项目指标使用台帐</h1>
+        <div id="search">
+            <a id="btnExportExcel" href="javascript:void(0)">导出Excel</a>
+        </div>
+        <br />
+        <div id="t1Div" style="float:left;width:1302px">
+            <table id="t1"></table>
+        </div>
+        <div id="t2Div" style="float:left;width:672px">
+            <table id="t2"></table>
+        </div>
+    </div>
+</body>
+</html>

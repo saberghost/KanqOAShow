@@ -1,0 +1,1 @@
+﻿var urlAuthority = "http://localhost:38236/";

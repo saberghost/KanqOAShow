@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>房屋拆迁补偿汇总表</title>
+    <meta charset="utf-8" />
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 100%;
+        }
+
+        #search {
+            text-align: center;
+        }
+
+        #dataGrid {
+            text-align: center;
+        }
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script>
+        $(function () {
+            $("#txtName").textbox({
+                prompt: "用户名"
+            });
+            $("#txtIDCard").textbox({
+                prompt: "身份证号码"
+            });
+            $("#btnSearch").linkbutton({
+                text: "查询",
+                iconCls: "icon-search",
+                onClick: function () {
+                    $("#t1").datagrid("load", {
+                        "txtName": $("#txtName").textbox("getValue"),
+                        "txtIDCard": $("#txtIDCard").textbox("getValue")
+                    });
+                }
+            });
+            $("#t1").datagrid({
+                //title: "demo",
+                pagination: true,
+                //width: 500,
+                height: 500,
+                //url: "http://localhost:58088/ashx/FwcqBcHzb.ashx?callback=?",
+                columns:
+                [
+                    //[{ title: '需要安置人口数', rowspan: 2, width: 100 }],
+                    [
+                        { field: 'T1', title: '姓名', rowspan: 3, align: "center" },
+                        { field: 'T2', title: '人口', rowspan: 3, align: "center" },
+                        { title: '需要安置人口数', colspan: 2, align: "center" },
+                        { field: 'T5', title: '身份证号码', rowspan: 3, align: "center" },
+                        { field: 'T6', title: '住址', rowspan: 3, align: "center" },
+                        { field: 'T7', title: '总面积(㎡)', rowspan: 3, align: "center" },
+                        { title: '合法面积(㎡)', colspan: 5, align: "center" },
+                        { field: 'T13', title: '生产用房(㎡)', rowspan: 3, align: "center" },
+                        { field: 'T14', title: '其他性质<br />建筑面积(㎡)', rowspan: 3, align: "center" },
+                        { title: '各项补偿金额（元）', colspan: 11, align: "center" },
+                        { field: 'T26', title: '合计（元）', rowspan: 3, align: "center" },
+                        { field: 'T27', title: '备注', rowspan: 3, align: "center" }
+                    ],
+                    [
+                        { field: 'T3', title: '农业户口', rowspan: 2, align: "center" },
+                        { field: 'T4', title: '非农业户口', rowspan: 2, align: "center" },
+                        { title: '砖混', colspan: 2, align: "center" },
+                        { field: 'T10', title: '砖木', rowspan: 2, align: "center" },
+                        { field: 'T11', title: '土木', rowspan: 2, align: "center" },
+                        { field: 'T12', title: '小计', rowspan: 2, align: "center" },
+                        { field: 'T15', title: '房屋补偿费', rowspan: 2, align: "center" },
+                        { field: 'T16', title: '装饰装修费', rowspan: 2, align: "center" },
+                        { field: 'T17', title: '购房补助费', rowspan: 2, align: "center" },
+                        { field: 'T18', title: '室外设施费', rowspan: 2, align: "center" },
+                        { field: 'T19', title: '生产用房补助费', rowspan: 2, align: "center" },
+                        { field: 'T20', title: '农用工具、牲畜补助费', rowspan: 2, align: "center" },
+                        { field: 'T21', title: '搬迁费', rowspan: 2, align: "center" },
+                        { field: 'T22', title: '过渡费', rowspan: 2, align: "center" },
+                        { field: 'T23', title: '其他补偿费', rowspan: 2, align: "center" },
+                        { field: 'T24', title: '奖金', rowspan: 2, align: "center" },
+                        { field: 'T25', title: '增补金额', rowspan: 2, align: "center" },
+                    ],
+                    [
+                        { field: 'T8', title: '一类', align: "center" },
+                        { field: 'T9', title: '二类', align: "center" }
+                    ]
+                ],
+                striped: true,
+                singleSelect: true,
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="master">
+        <div id="search">
+            <h1>房屋拆迁补偿汇总表</h1>
+            <input id="txtName" />
+            <input id="txtIDCard" />
+            <a id="btnSearch"></a>
+        </div>
+        <br />
+        <div id="dataGrid">
+            <table id="t1"></table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,603 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>长沙县国土资源局劳务派遣人员工资明细表</title>
+    <meta charset="utf-8" />
+    <link href="../Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../Content/themes/icon.css" rel="stylesheet" />
+    <style>
+        #master {
+            margin: 0px auto;
+            width: 1208px;
+        }
+
+        #search {
+            text-align: left;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form td {
+            border: solid 1px black;
+            width: 150px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #setForm td {
+            border: none;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        form input {
+            /*margin-top: -1px;
+            margin-bottom: -1px;*/
+            /*height: 20px;*/
+            border: none;
+            /*width: 99%;*/
+            /*font-size: 14px;*/
+            text-align: center;
+        }
+
+        form textarea {
+            /*margin-top: -1px;
+            margin-bottom: -1px;*/
+            border: none;
+            width: 99%;
+            height: 50px;
+            /*font-size: 14px;*/
+        }
+
+        #addDiv span.datebox, #addDiv span.textbox, #editDiv span.datebox, #editDiv span.textbox {
+            border: none;
+        }
+
+        #logDiv {
+            width: 518px;
+        }
+    </style>
+    <script src="../Scripts/jquery-1.12.4.js"></script>
+    <script src="../Scripts/jquery.easyui-1.4.4.min.js"></script>
+    <script src="../Scripts/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../Scripts/share.js"></script>
+    <script>
+        var xbData = [{ lable: "男", value: "男" }, { lable: "女", value: "女" }];
+        var bmData = [
+            { lable: "长沙县不动产登记中心", value: "不动产登记中心" },
+            { lable: "长沙县土地开发中心", value: "开发中心" },
+            { lable: "长沙县征地拆迁中心", value: "拆迁中心" },
+            { lable: "长沙县国土资源测绘队", value: "测绘队" },
+            { lable: "长沙县土地整理中心", value: "整理中心" },
+            { lable: "长沙县国土资源交易中心", value: "交易中心" }
+        ];
+        $(function () {
+            $("#addDiv").css("display", "none");
+            $("#editDiv").css("display", "none");
+            $("#logDiv").css("display", "none");
+            $("#setDiv").css("display", "none");
+            $("#txtXM").textbox({
+                width: 100,
+            });
+            $("#txtXB").combobox({
+                valueField: "value",
+                textField: "lable",
+                width: 100,
+                data: xbData
+            });
+            $("#txtWHCD").textbox({
+                width: 100,
+            });
+            $("#txtXLLB").textbox({
+                width: 100,
+            });
+            $("#txtJRBDWSJ").datebox({
+                width: 100,
+            });
+            $("#txtSFZHM").textbox({
+                width: 100,
+            });
+            $("#txtGZGW").textbox({
+                width: 100,
+            });
+            $("#txtZXSJ").datebox({
+                width: 100,
+            });
+            $("#txtBM").combobox({
+                valueField: "value",
+                textField: "lable",
+                width: 160,
+                data: bmData,
+                onSelect: function () {
+                    reloadData();
+                }
+            });
+            $("#btnSearch").linkbutton({
+                text: "查询",
+                iconCls: "icon-search",
+                onClick: function () {
+                    reloadData();
+                }
+            });
+            loadDataGrid();
+            verifyIdCard($("#SFZHM"));
+            verifyIdCard($("#SFZHM2"));
+        });
+
+        function formatCellTooltip(value) {
+            if (!value) {
+                return value;
+            }
+            return "<span title='" + value + "'>" + value + "</span>";
+        }
+
+        function reloadData() {
+            $("#t1").datagrid("load", {
+                XM: $("#txtXM").textbox("getValue"),
+                XB: $("#txtXB").combobox("getValue"),
+                WHCD: $("#txtWHCD").textbox("getValue"),
+                XLLB: $("#txtXLLB").textbox("getValue"),
+                SFZHM: $("#txtSFZHM").textbox("getValue"),
+                GZGW: $("#txtGZGW").textbox("getValue"),
+                JRBDWSJ: $("#txtJRBDWSJ").datebox("getValue"),
+                ZXSJ: $("#txtZXSJ").datebox("getValue"),
+                BM: $("#txtBM").combobox("getValue")
+            });
+        }
+
+        function sumEvent(sourceArray, total) {
+            $.each(sourceArray, function (index, item) {
+                item.numberbox({
+                    onChange: function (newValue, oldValue) {
+                        sumCal(sourceArray, total);
+                    }
+                });
+            });
+        }
+
+        function sumCal(sourceArray, total) {
+            var sum = 0;
+            $.each(sourceArray, function (index, item) {
+                sum += Number(item.numberbox("getValue"));
+            });
+            total.numberbox("setValue", sum);
+        }
+
+        function verifyIdCard(e) {
+            /// <summary>身份证验证</summary>
+            e.blur(function () {
+                var regIdCard = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/;
+                if ($(this).val() == "") {
+                    return;
+                }
+                if (!regIdCard.test($(this).val())) {
+                    $.messager.alert('警告', '您输入的身份证格式有误', 'warning', function () {
+                        e.val("");
+                    });
+                }
+            });
+        }
+
+        function bindAddClick() {
+            $("#addDiv").css("display", "block");
+            $("#BM").combobox({
+                valueField: "value",
+                textField: "value",
+                width: 170,
+                data: bmData,
+            });
+            $("#JRBDWSJ").datebox();
+            $("#JBGZ").numberbox({ precision: 2 });
+            $("#GWGZ").numberbox({ precision: 2 });
+            $("#HSBZ").numberbox({ precision: 2 });
+            $("#JTBZ").numberbox({ precision: 2 });
+            $("#HJ").numberbox({ precision: 2 });
+            sumEvent([$("#JBGZ"), $("#GWGZ"), $("#HSBZ"), $("#JTBZ")], $("#HJ"));
+            $("#addDiv").dialog({
+                //width: 750,
+                //height: 350,
+                title: "新增人员工资明细",
+                collapsible: false,
+                maximizable: false,
+                resizable: false,
+                modal: true,
+                onClose: function () {
+                    $("#addForm").form("clear");
+                },
+                toolbar: [{
+                    text: '保存',
+                    iconCls: 'icon-save',
+                    handler: function () {
+                        $("#addForm").form("submit", {
+                            url: urlAuthority + "WageDetail/add",
+                            success: function (data) {
+                                reloadData();
+                                $("#addDiv").dialog("close");
+                            }
+                        });
+                    }
+                }],
+            });
+        }
+
+        function bindEditClick() {
+            var json = $("#t1").datagrid("getSelected");
+            if (json == null) {
+                $.messager.alert('警告', '请选中一行进行编辑', 'warning');
+                return false;
+            }
+            $("#ID").val(json.ID);
+            $("#editDiv").css("display", "block");
+            $("#BM2").combobox({
+                valueField: "value",
+                textField: "value",
+                width: 170,
+                data: bmData
+            });
+            $("#JRBDWSJ2").datebox();
+            $("#JBGZ2").numberbox({ precision: 2 });
+            $("#GWGZ2").numberbox({ precision: 2 });
+            $("#HSBZ2").numberbox({ precision: 2 });
+            $("#JTBZ2").numberbox({ precision: 2 });
+            $("#HJ2").numberbox({ precision: 2 });
+            sumEvent([$("#JBGZ2"), $("#GWGZ2"), $("#HSBZ2"), $("#JTBZ2")], $("#HJ2"));
+            $("#editForm").form("load", urlAuthority + "WageDetail/View?callback=?&ID=" + json.ID);
+            $("#editDiv").dialog({
+                //width: 750,
+                //height: 350,
+                title: "修改人员工资明细",
+                collapsible: false,
+                maximizable: false,
+                resizable: false,
+                modal: true,
+                toolbar: [{
+                    text: '保存',
+                    iconCls: 'icon-save',
+                    handler: function () {
+                        $("#editForm").form("submit", {
+                            url: urlAuthority + "WageDetail/Edit",
+                            success: function (data) {
+                                reloadData();
+                                $("#editDiv").dialog("close");
+                            }
+                        });
+                    }
+                }],
+            });
+        }
+
+        function bindRemoveClick() {
+            var json = $("#t1").datagrid("getSelected");
+            if (json == null) {
+                $.messager.alert('警告', '请选中一行进行删除', 'warning');
+                return false;
+            }
+            $.messager.confirm("删除提示", "确定要删除此记录吗", function (r) {
+                if (r) {
+                    $.getJSON(urlAuthority + "WageDetail/Remove?callback=?", { id: json.ID }, function (data) {
+                        reloadData();
+                    });
+                }
+            });
+        }
+
+        function bindSettingsClick() {
+            $("#setDiv").css("display", "block");
+            $("#txtMAXCQ").textbox();
+            $("#txtMAXQT").textbox();
+            $("#setForm").form("load", urlAuthority + "WageDetail/setView?callback=?");
+            $("#setDiv").dialog({
+                //width: 750,
+                //height: 350,
+                title: "设置",
+                collapsible: false,
+                maximizable: false,
+                resizable: false,
+                modal: true,
+                onClose: function () {
+                    $("#setForm").form("clear");
+                },
+                toolbar: [{
+                    text: '保存',
+                    iconCls: 'icon-save',
+                    handler: function () {
+                        $("#setForm").form("submit", {
+                            url: urlAuthority + "WageDetail/setEdit",
+                            success: function (data) {
+                                $("#setDiv").dialog("close");
+                            }
+                        });
+                    }
+                }],
+            });
+        }
+
+        function loadDataGrid() {
+            /// <summary>加载数据列表</summary>
+            $("#t1").datagrid({
+                toolbar: [{
+                    id: 'btnadd',
+                    text: '新增',
+                    iconCls: 'icon-add',
+                    handler: 'bindAddClick'
+                }, {
+                    id: 'btnedit',
+                    text: '修改',
+                    iconCls: 'icon-edit',
+                    handler: 'bindEditClick'
+                }, {
+                    id: 'btnremove',
+                    text: '删除',
+                    iconCls: 'icon-remove',
+                    handler: 'bindRemoveClick'
+                }, '-', {
+                    id: 'btnSettings',
+                    text: '设置',
+                    iconCls: 'icon-more',
+                    handler: 'bindSettingsClick'
+                }],
+                rownumbers: true,//显示行数
+                pagination: true,//分页
+                pageSize: 18,//每页记录数
+                pageList: [18],//可选择的每页记录数
+                height: 576,
+                url: urlAuthority + "WageDetail/showModify?callback=?",
+                columns:
+                [
+                    [
+                        { field: 'ID', title: 'ID', rowspan: 2, align: "center", width: 50, hidden: true },
+                        { field: 'XM', title: '姓名', rowspan: 2, align: "center", width: 50 },
+                        { field: 'XB', title: '性别', rowspan: 2, align: "center", width: 50 },
+                        { field: 'WHCD', title: '文化<br />程度', rowspan: 2, align: "center", width: 50 },
+                        { field: 'BYXX', title: '毕业学校', rowspan: 2, align: "center", width: 100 },
+                        { field: 'ZY', title: '专业', rowspan: 2, align: "center", width: 50 },
+                        { field: 'XLLB', title: '学历类别', rowspan: 2, align: "center", width: 80 },
+                        { field: 'JRBDWSJ', title: '进入本单位<br />工作时间', rowspan: 2, align: "center", width: 80 },
+                        { field: 'SFZHM', title: '身份证号', rowspan: 2, align: "center", width: 125 },
+                        { field: 'GZGW', title: '工作岗位', rowspan: 2, align: "center", width: 80 },
+                        { title: '现工资情况', colspan: 4, align: "center" },
+                        { field: 'HJ', title: '合计<br />（元/月）', rowspan: 2, align: "center", width: 80 },
+                        { field: 'ZXSJ', title: '执行时间', rowspan: 2, align: "center", width: 80 },
+                        { field: 'BZ', title: '备注', rowspan: 2, align: "center", width: 150, formatter: formatCellTooltip }
+                    ],
+                    [
+                        { field: 'JBGZ', title: '基本<br />工资', align: "center", width: 50 },
+                        { field: 'GWGZ', title: '岗位<br />工资', align: "center", width: 50 },
+                        { field: 'HSBZ', title: '伙食<br />补助', align: "center", width: 50 },
+                        { field: 'JTBZ', title: '交通<br />补助', align: "center", width: 50 }
+                    ]
+                ],
+                onDblClickRow: function (rowIndex, rowData) {
+                    $("#logDiv").css("display", "block");
+                    $("#logDiv").dialog({
+                        title: "人员工资调整历史",
+                        collapsible: false,
+                        maximizable: false,
+                        resizable: false,
+                        modal: true
+                    });
+                    $("#logTb").datagrid("load", {
+                        MID: rowData["ID"]
+                    });
+                },
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+
+            $("#logTb").datagrid({
+                height: 400,
+                url: urlAuthority + "WageDetail/showLog?callback=?",
+                columns:
+                [
+                    [
+                        { field: 'ID', title: 'ID', rowspan: 2, align: "center", width: 50, hidden: true },
+                        { title: '现工资情况', colspan: 4, align: "center" },
+                        { title: '本月增加', colspan: 2, align: "center" },
+                        { field: 'HJ', title: '合计<br />（元/月）', rowspan: 2, align: "center", width: 80 },
+                        { field: 'ZXSJ', title: '执行时间', rowspan: 2, align: "center", width: 80 }
+                    ],
+                    [
+                        { field: 'JBGZ', title: '基本<br />工资', align: "center", width: 50 },
+                        { field: 'GWGZ', title: '岗位<br />工资', align: "center", width: 50 },
+                        { field: 'HSBZ', title: '伙食<br />补助', align: "center", width: 50 },
+                        { field: 'JTBZ', title: '交通<br />补助', align: "center", width: 50 },
+                        {
+                            field: 'BYXZJBGZ', title: '基本工资', align: "center", width: 70, styler: function (value, row, index) {
+                                return 'color:red;';
+                            }
+                        },
+                        {
+                            field: 'BYXZGWGZ', title: '岗位工资', align: "center", width: 70, editor: 'text', styler: function (value, row, index) {
+                                return 'color:red;';
+                            }
+                        }
+                    ]
+                ],
+                striped: true,//显示条纹
+                singleSelect: true//单选模式
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="master">
+        <h1>长沙县国土资源局劳务派遣人员工资明细表</h1>
+        <div id="search">
+            <table>
+                <tr>
+                    <td><label>姓名：</label></td>
+                    <td><input id="txtXM" /></td>
+                    <td><label>文化程度：</label></td>
+                    <td><input id="txtWHCD" /></td>
+                    <td><label>身份证号：</label></td>
+                    <td><input id="txtSFZHM" /></td>
+                    <td><label>入职时间：</label></td>
+                    <td><input id="txtJRBDWSJ" /></td>
+                </tr>
+                <tr>
+                    <td><label>性别：</label></td>
+                    <td><input id="txtXB" /></td>
+                    <td><label>学历类别：</label></td>
+                    <td><input id="txtXLLB" /></td>
+                    <td><label>工作岗位：</label></td>
+                    <td><input id="txtGZGW" /></td>
+                    <td><label>执行时间：</label></td>
+                    <td><input id="txtZXSJ" /></td>
+                </tr>
+            </table>
+
+        </div>
+        <br />
+        <div>
+            <span style="font-family:楷体_GB2312">单位：</span>
+            <input id="txtBM" />
+            <a id="btnSearch"></a>
+            <span style="float:right;font-family:楷体_GB2312">单位：元/月</span>
+        </div>
+        <div id="dataGrid">
+            <table id="t1"></table>
+        </div>
+        <div id="addDiv">
+            <form id="addForm" method="post">
+                <table>
+                    <tr>
+                        <td>姓名</td>
+                        <td><input type="text" name="XM" /></td>
+                        <td>身份证号码</td>
+                        <td><input id="SFZHM" type="text" name="SFZHM" /></td>
+                    </tr>
+                    <tr>
+                        <td>文化程度</td>
+                        <td><input type="text" name="WHCD" /></td>
+                        <td>部门</td>
+                        <td><input id="BM" type="text" name="BM" /></td>
+                    </tr>
+                    <tr>
+                        <td>毕业学校</td>
+                        <td><input type="text" name="BYXX" /></td>
+                        <td>性别</td>
+                        <td><input type="text" name="XB" /></td>
+                    </tr>
+                    <tr>
+                        <td>专业</td>
+                        <td><input type="text" name="ZY" /></td>
+                        <td>工作岗位</td>
+                        <td><input type="text" name="GZGW" /></td>
+                    </tr>
+                    <tr>
+                        <td>学历类别</td>
+                        <td><input type="text" name="XLLB" /></td>
+                        <td>进入单位时间</td>
+                        <td><input id="JRBDWSJ" type="text" name="JRBDWSJ" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">现工资情况</td>
+                    </tr>
+                    <tr>
+                        <td>基本工资</td>
+                        <td>岗位工资</td>
+                        <td>伙食补助</td>
+                        <td>交通补助</td>
+                    </tr>
+                    <tr>
+                        <td><input id="JBGZ" type="text" name="JBGZ" /></td>
+                        <td><input id="GWGZ" type="text" name="GWGZ" /></td>
+                        <td><input id="HSBZ" type="text" name="HSBZ" /></td>
+                        <td><input id="JTBZ" type="text" name="JTBZ" /></td>
+                    </tr>
+                    <tr>
+                        <td>合计</td>
+                        <td colspan="3"><input id="HJ" style="width:99%" type="text" name="HJ" /></td>
+                    </tr>
+                    <tr>
+                        <td>备注</td>
+                        <td colspan="3"><textarea name="BZ"></textarea></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="editDiv">
+            <form id="editForm" method="post">
+                <input id="ID" type="hidden" name="ID" />
+                <table>
+                    <tr>
+                        <td>姓名</td>
+                        <td><input type="text" name="XM" /></td>
+                        <td>身份证号码</td>
+                        <td><input id="SFZHM2" type="text" name="SFZHM" /></td>
+                    </tr>
+                    <tr>
+                        <td>文化程度</td>
+                        <td><input type="text" name="WHCD" /></td>
+                        <td>部门</td>
+                        <td><input id="BM2" type="text" name="BM" /></td>
+                    </tr>
+                    <tr>
+                        <td>毕业学校</td>
+                        <td><input type="text" name="BYXX" /></td>
+                        <td>性别</td>
+                        <td><input type="text" name="XB" /></td>
+                    </tr>
+                    <tr>
+                        <td>专业</td>
+                        <td><input type="text" name="ZY" /></td>
+                        <td>工作岗位</td>
+                        <td><input type="text" name="GZGW" /></td>
+                    </tr>
+                    <tr>
+                        <td>学历类别</td>
+                        <td><input type="text" name="XLLB" /></td>
+                        <td>进入单位时间</td>
+                        <td><input id="JRBDWSJ2" type="text" name="JRBDWSJ" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">现工资情况</td>
+                    </tr>
+                    <tr>
+                        <td>基本工资</td>
+                        <td>岗位工资</td>
+                        <td>伙食补助</td>
+                        <td>交通补助</td>
+                    </tr>
+                    <tr>
+                        <td><input id="JBGZ2" type="text" name="JBGZ" /></td>
+                        <td><input id="GWGZ2" type="text" name="GWGZ" /></td>
+                        <td><input id="HSBZ2" type="text" name="HSBZ" /></td>
+                        <td><input id="JTBZ2" type="text" name="JTBZ" /></td>
+                    </tr>
+                    <tr>
+                        <td>合计</td>
+                        <td colspan="3"><input id="HJ2" style="width:99%" type="text" name="HJ" /></td>
+                    </tr>
+                    <tr>
+                        <td>备注</td>
+                        <td colspan="3"><textarea name="BZ"></textarea></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="logDiv">
+            <table id="logTb"></table>
+        </div>
+        <div id="setDiv" style="padding:20px 20px 20px 20px">
+            <form id="setForm" method="post">
+                <table>
+                    <tr>
+                        <td>拆迁中心工资上限：</td>
+                        <td><input id="txtMAXCQ" type="text" name="MAXCQ" /></td>
+                    </tr>
+                    <tr>
+                        <td>其它科室工资上限：</td>
+                        <td><input id="txtMAXQT" type="text" name="MAXQT" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
